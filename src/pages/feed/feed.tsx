@@ -2,6 +2,7 @@ import { FC, useEffect } from 'react';
 import { Preloader } from '@ui';
 import { FeedUI } from '@ui-pages';
 import { useDispatch, useSelector } from '../../services/store';
+import { fetchFeed } from '../../services/slices/feedSlice';
 
 export const Feed: FC = () => {
   /** TODO: взять переменную из стора */
@@ -12,14 +13,7 @@ export const Feed: FC = () => {
   const totalToday = useSelector((state) => state.feed.totalToday);
 
   useEffect(() => {
-    dispatch({
-      type: 'ws/connect',
-      payload: 'wss://norma.education-services.ru/orders/all'
-    });
-
-    return () => {
-      dispatch({ type: 'ws/disconnect' });
-    };
+    dispatch(fetchFeed());
   }, [dispatch]);
 
   if (!orders.length) {

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from '../../services/store';
 import { createOrder } from '../../services/slices/orderSlice';
 import { clearOrder } from '../../services/slices/orderSlice';
+import { clearConstructor } from '../../services/slices/constructorSlice';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
@@ -21,12 +22,13 @@ export const BurgerConstructor: FC = () => {
     bun: burgerConstructor?.bun ?? null,
     ingredients: burgerConstructor?.ingredients ?? []
   };
+
   const { orderData, isLoading } = useSelector((state) => state.order);
 
   const orderRequest = isLoading;
   const orderModalData = orderData;
 
-  const onOrderClick = () => {
+  const onOrderClick = async () => {
     if (!constructorItems.bun || orderRequest) return;
 
     if (!isAuth) {
@@ -36,11 +38,17 @@ export const BurgerConstructor: FC = () => {
 
     const ingredientsIds = [
       constructorItems.bun._id,
-      ...constructorItems.ingredients.map((item: any) => item._id),
+      ...constructorItems.ingredients.map(
+        (item: TConstructorIngredient) => item._id
+      ),
       constructorItems.bun._id
     ];
 
-    dispatch(createOrder(ingredientsIds));
+    const res = await dispatch(createOrder(ingredientsIds));
+
+    if (createOrder.fulfilled.match(res)) {
+      dispatch(clearConstructor());
+    }
   };
 
   const closeOrderModal = () => {
@@ -50,7 +58,7 @@ export const BurgerConstructor: FC = () => {
   const price = useMemo(
     () =>
       (constructorItems.bun ? constructorItems.bun.price * 2 : 0) +
-      ((constructorItems.ingredients ?? []) as any[]).reduce(
+      ((constructorItems.ingredients ?? []) as TConstructorIngredient[]).reduce(
         (s, v) => s + v.price,
         0
       ),

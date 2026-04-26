@@ -1,8 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TOrder } from '../../utils/types';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { getFeedsApi, getOrdersApi } from '../../utils/burger-api';
 
 type TFeedState = {
+  orders: TOrder[];
+  total: number;
+  totalToday: number;
+};
+
+type TFeedResponse = {
   orders: TOrder[];
   total: number;
   totalToday: number;
@@ -14,11 +21,21 @@ const initialState: TFeedState = {
   totalToday: 0
 };
 
-export const fetchFeed = createAsyncThunk('feed/fetch', async () => {
-  const res = await fetch('https://norma.education-services.ru/api/orders');
-  const data = await res.json();
-  return data;
-});
+export const fetchFeed = createAsyncThunk<TFeedResponse>(
+  'feed/fetch',
+  async () => {
+    const res = await getFeedsApi();
+    return res;
+  }
+);
+
+export const fetchUserOrders = createAsyncThunk<TOrder[]>(
+  'feed/fetchUserOrders',
+  async () => {
+    const res = await getOrdersApi();
+    return res;
+  }
+);
 
 const feedSlice = createSlice({
   name: 'feed',
@@ -35,6 +52,10 @@ const feedSlice = createSlice({
       state.orders = action.payload.orders;
       state.total = action.payload.total;
       state.totalToday = action.payload.totalToday;
+    });
+
+    builder.addCase(fetchUserOrders.fulfilled, (state, action) => {
+      state.orders = action.payload;
     });
   }
 });

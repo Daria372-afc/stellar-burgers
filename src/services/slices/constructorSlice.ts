@@ -25,9 +25,22 @@ const constructorSlice = createSlice({
       } else {
         state.ingredients = [...state.ingredients, ingredient];
       }
+    },
+
+    removeIngredient(state, action: PayloadAction<string>) {
+      state.ingredients = state.ingredients.filter(
+        (item) => item.id !== action.payload
+      );
+    },
+
+    clearConstructor(state) {
+      state.bun = null;
+      state.ingredients = [];
     }
   }
 });
 
-export const { addIngredient } = constructorSlice.actions;
+export const { addIngredient, removeIngredient, clearConstructor } =
+  constructorSlice.actions;
+
 export default constructorSlice.reducer;

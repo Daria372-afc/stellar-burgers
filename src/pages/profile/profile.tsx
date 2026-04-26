@@ -85,17 +85,18 @@ export const Profile: FC = () => {
       return;
     }
 
-    const data: any = {
+    const data: {
+      name: string;
+      email: string;
+      password?: string;
+    } = {
       name: formValue.name,
-      email: formValue.email
+      email: formValue.email,
+      ...(formValue.password && { password: formValue.password })
     };
 
-    if (formValue.password) {
-      data.password = formValue.password;
-    }
-
-    dispatch(updateUser(data)).then((res: any) => {
-      if (res.meta.requestStatus === 'fulfilled') {
+    dispatch(updateUser(data)).then((res) => {
+      if (updateUser.fulfilled.match(res)) {
         setSuccess(true);
 
         if (formValue.name !== user?.name) {

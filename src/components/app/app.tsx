@@ -24,12 +24,15 @@ import { useDispatch } from '../../services/store';
 import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 import { ProtectedRoute } from '../protected-route';
 import { getUser } from '../../services/slices/userSlice';
+import { useSelector } from '../../services/store';
 
 const App = () => {
   /** TODO: взять переменные из стора */
-  const isIngredientsLoading = false;
-  const ingredients = [];
-  const error = null;
+  const {
+    items: ingredients,
+    isLoading,
+    error
+  } = useSelector((state) => state.ingredients);
 
   const dispatch = useDispatch();
 
@@ -42,6 +45,14 @@ const App = () => {
   const navigate = useNavigate();
   const background = location.state?.background;
 
+  if (isLoading) {
+    return <div>Загрузка...</div>;
+  }
+
+  if (error) {
+    return <div>Ошибка загрузки ингредиентов</div>;
+  }
+
   return (
     <div className={styles.app}>
       <AppHeader />
@@ -51,10 +62,41 @@ const App = () => {
 
         <Route path='/feed' element={<Feed />} />
 
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
+        <Route
+          path='/login'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path='/profile'
@@ -70,6 +112,19 @@ const App = () => {
           element={
             <ProtectedRoute>
               <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path='/ingredients/:id' element={<IngredientDetails />} />
+
+        <Route path='/feed/:number' element={<OrderInfo />} />
+
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
             </ProtectedRoute>
           }
         />

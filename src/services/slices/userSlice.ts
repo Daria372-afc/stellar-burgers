@@ -5,17 +5,20 @@ import { registerUserApi } from '../../utils/burger-api';
 import { TUser } from '../../utils/types';
 import { logoutApi } from '../../utils/burger-api';
 import { updateUserApi } from '../../utils/burger-api';
+import { setCookie } from '../../utils/cookie';
 
 type TUserState = {
   user: TUser | null;
   isAuth: boolean;
   isLoading: boolean;
+  isAuthChecked: boolean;
 };
 
 const initialState: TUserState = {
   user: null,
   isAuth: false,
-  isLoading: false
+  isLoading: false,
+  isAuthChecked: false
 };
 
 export const getUser = createAsyncThunk('user/getUser', async () => {
@@ -29,7 +32,8 @@ export const loginUser = createAsyncThunk(
     const res = await loginUserApi(data);
 
     localStorage.setItem('refreshToken', res.refreshToken);
-    localStorage.setItem('accessToken', res.accessToken);
+    setCookie('accessToken', res.accessToken);
+
     return res.user;
   }
 );
@@ -40,7 +44,7 @@ export const registerUser = createAsyncThunk(
     const res = await registerUserApi(data);
 
     localStorage.setItem('refreshToken', res.refreshToken);
-    localStorage.setItem('accessToken', res.accessToken);
+    setCookie('accessToken', res.accessToken);
 
     return res.user;
   }
@@ -48,7 +52,7 @@ export const registerUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
   'user/updateUser',
-  async (data: { email: string; password: string; name: string }) => {
+  async (data: { email: string; password?: string; name: string }) => {
     const res = await updateUserApi(data);
     return res.user;
   }
@@ -76,11 +80,13 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload;
         state.isAuth = true;
+        state.isAuthChecked = true;
       })
       .addCase(getUser.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuth = false;
+        state.isAuthChecked = true;
       })
       .addCase(loginUser.pending, (state) => {
         state.isLoading = true;
