@@ -15,8 +15,10 @@ type TRefreshResponse = TServerResponse<{
   accessToken: string;
 }>;
 
-export const refreshToken = (): Promise<TRefreshResponse> =>
-  fetch(`${URL}/auth/token`, {
+export const refreshToken = (): Promise<TRefreshResponse> => {
+  console.log('REFRESH TOKEN:', localStorage.getItem('refreshToken'));
+
+  return fetch(`${URL}/auth/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
@@ -34,6 +36,7 @@ export const refreshToken = (): Promise<TRefreshResponse> =>
       setCookie('accessToken', refreshData.accessToken);
       return refreshData;
     });
+};
 
 export const fetchWithRefresh = async <T>(
   url: RequestInfo,
@@ -43,7 +46,16 @@ export const fetchWithRefresh = async <T>(
     const res = await fetch(url, options);
     return await checkResponse<T>(res);
   } catch (err) {
-    if ((err as { message: string }).message === 'jwt expired') {
+    if (
+      (err as { message: string }).message === 'jwt expired' &&
+      localStorage.getItem('refreshToken')
+    ) {
+      const refreshTokenValue = localStorage.getItem('refreshToken');
+
+      if (!refreshTokenValue) {
+        return Promise.reject(err);
+      }
+
       const refreshData = await refreshToken();
       if (options.headers) {
         (options.headers as { [key: string]: string }).authorization =
@@ -224,12 +236,15 @@ export const resetPasswordApi = (data: { password: string; token: string }) =>
 
 type TUserResponse = TServerResponse<{ user: TUser }>;
 
-export const getUserApi = () =>
-  fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
+export const getUserApi = () => {
+  console.log('ACCESS TOKEN:', getCookie('accessToken'));
+
+  return fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
     headers: {
       authorization: getCookie('accessToken')
     } as HeadersInit
   });
+};
 
 export const updateUserApi = (user: Partial<TRegisterData>) =>
   fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
@@ -241,13 +256,21 @@ export const updateUserApi = (user: Partial<TRegisterData>) =>
     body: JSON.stringify(user)
   });
 
-export const logoutApi = () =>
-  fetch(`${URL}/auth/logout`, {
+export const logoutApi = () => {
+  console.log('logout token:', localStorage.getItem('refreshToken'));
+  const token = localStorage.getItem('refreshToken');
+
+  if (!token) {
+    return Promise.resolve({ success: true });
+  }
+
+  return fetch(`${URL}/auth/logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8'
     },
     body: JSON.stringify({
-      token: localStorage.getItem('refreshToken')
+      token
     })
   }).then((res) => checkResponse<TServerResponse<{}>>(res));
+};

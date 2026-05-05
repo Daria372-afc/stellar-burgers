@@ -11,7 +11,6 @@ import userReducer from './slices/userSlice';
 import orderReducer from './slices/orderSlice';
 import constructorReducer from './slices/constructorSlice';
 import { combineReducers } from '@reduxjs/toolkit';
-import { socketMiddleware } from './middleware/socketMiddleware';
 import feedReducer from './slices/feedSlice';
 
 const rootReducer = combineReducers({
@@ -24,8 +23,7 @@ const rootReducer = combineReducers({
 
 const store = configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(socketMiddleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
   devTools: process.env.NODE_ENV !== 'production'
 });
 

@@ -6,6 +6,7 @@ import { TUser } from '../../utils/types';
 import { logoutApi } from '../../utils/burger-api';
 import { updateUserApi } from '../../utils/burger-api';
 import { setCookie } from '../../utils/cookie';
+import { deleteCookie } from '../../utils/cookie';
 
 type TUserState = {
   user: TUser | null;
@@ -62,7 +63,7 @@ export const logoutUser = createAsyncThunk('user/logoutUser', async () => {
   await logoutApi();
 
   localStorage.removeItem('refreshToken');
-  localStorage.removeItem('accessToken');
+  deleteCookie('accessToken');
 
   return null;
 });
@@ -75,6 +76,7 @@ const userSlice = createSlice({
     builder
       .addCase(getUser.pending, (state) => {
         state.isLoading = true;
+        state.isAuthChecked = false;
       })
       .addCase(getUser.fulfilled, (state, action) => {
         state.isLoading = false;

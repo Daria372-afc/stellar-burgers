@@ -5,6 +5,7 @@ import { logoutUser } from '../../services/slices/userSlice';
 import { useSelector } from '../../services/store';
 import { updateUser } from '../../services/slices/userSlice';
 import { ChangeEvent } from 'react';
+import { Preloader } from '@ui';
 
 export type ProfileUIProps = {
   formValue: {
@@ -29,6 +30,7 @@ export type ProfileUIProps = {
 };
 
 export const Profile: FC = () => {
+  console.log('RENDER');
   /** TODO: взять переменную из стора */
   const dispatch = useDispatch();
 
@@ -37,6 +39,7 @@ export const Profile: FC = () => {
   };
 
   const user = useSelector((state) => state.user.user);
+  const isAuthChecked = useSelector((state) => state.user.isAuthChecked);
 
   const [formValue, setFormValue] = useState({
     name: '',
@@ -52,6 +55,7 @@ export const Profile: FC = () => {
 
   useEffect(() => {
     if (user) {
+      console.log('EFFECT: user пришёл', user);
       setFormValue({
         name: user.name || '',
         email: user.email || '',
@@ -60,11 +64,19 @@ export const Profile: FC = () => {
     }
   }, [user]);
 
+  if (!isAuthChecked || !user) {
+    return <Preloader />;
+  }
+
   const isFormChanged =
     !!user &&
     (formValue.name !== user.name ||
       formValue.email !== user.email ||
       formValue.password !== '');
+
+  console.log('USER:', user);
+  console.log('FORM:', formValue);
+  console.log('isFormChanged:', isFormChanged);
 
   const validateEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

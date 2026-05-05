@@ -7,6 +7,8 @@ type TFeedState = {
   orders: TOrder[];
   total: number;
   totalToday: number;
+  isLoading: boolean;
+  error: string | null;
 };
 
 type TFeedResponse = {
@@ -18,7 +20,9 @@ type TFeedResponse = {
 const initialState: TFeedState = {
   orders: [],
   total: 0,
-  totalToday: 0
+  totalToday: 0,
+  isLoading: false,
+  error: null
 };
 
 export const fetchFeed = createAsyncThunk<TFeedResponse>(
@@ -41,22 +45,31 @@ const feedSlice = createSlice({
   name: 'feed',
   initialState,
   reducers: {
-    setOrders(state, action: PayloadAction<TFeedState>) {
+    setOrders(state, action: PayloadAction<TFeedResponse>) {
       state.orders = action.payload.orders;
       state.total = action.payload.total;
       state.totalToday = action.payload.totalToday;
     }
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchFeed.fulfilled, (state, action) => {
-      state.orders = action.payload.orders;
-      state.total = action.payload.total;
-      state.totalToday = action.payload.totalToday;
-    });
-
-    builder.addCase(fetchUserOrders.fulfilled, (state, action) => {
-      state.orders = action.payload;
-    });
+    builder
+      .addCase(fetchFeed.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchFeed.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.orders = action.payload.orders;
+        state.total = action.payload.total;
+        state.totalToday = action.payload.totalToday;
+      })
+      .addCase(fetchFeed.rejected, (state) => {
+        state.isLoading = false;
+        state.error = 'Ошибка загрузки';
+      })
+      .addCase(fetchUserOrders.fulfilled, (state, action) => {
+        state.orders = action.payload;
+      });
   }
 });
 

@@ -7,16 +7,22 @@ import { useDispatch } from '../../services/store';
 import { createOrder } from '../../services/slices/orderSlice';
 import { clearOrder } from '../../services/slices/orderSlice';
 import { clearConstructor } from '../../services/slices/constructorSlice';
+import { useEffect } from 'react';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(clearOrder());
+  }, [dispatch]);
+
   const isAuth = useSelector((state) => state.user.isAuth);
   const navigate = useNavigate();
   /** TODO: взять переменные constructorItems, orderRequest и orderModalData из стора */
   const burgerConstructor = useSelector((state) => state.burgerConstructor);
 
   console.log('STORE CONSTRUCTOR:', burgerConstructor);
-  console.log('TYPE:', typeof burgerConstructor); /**/
+  console.log('TYPE:', typeof burgerConstructor);
 
   const constructorItems = {
     bun: burgerConstructor?.bun ?? null,
@@ -24,6 +30,8 @@ export const BurgerConstructor: FC = () => {
   };
 
   const { orderData, isLoading } = useSelector((state) => state.order);
+
+  console.log('ORDER DATA:', orderData);
 
   const orderRequest = isLoading;
   const orderModalData = orderData;

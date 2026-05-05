@@ -36,14 +36,25 @@ const App = () => {
 
   const dispatch = useDispatch();
 
+  const isAuthChecked = useSelector((state) => state.user.isAuthChecked);
+
   useEffect(() => {
     dispatch(fetchIngredients());
-    dispatch(getUser());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (!isAuthChecked) {
+      dispatch(getUser());
+    }
+  }, [dispatch, isAuthChecked]);
 
   const location = useLocation();
   const navigate = useNavigate();
-  const background = location.state?.background;
+  const background =
+    location.state?.background &&
+    location.state.background.pathname !== location.pathname
+      ? location.state.background
+      : null;
 
   if (isLoading) {
     return <div>Загрузка...</div>;

@@ -9,6 +9,7 @@ import { addIngredient } from '../../services/slices/constructorSlice';
 export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
   ({ ingredient, count }) => {
     const location = useLocation();
+    console.log('CLICK FROM PAGE:', location.pathname);
     const dispatch = useDispatch();
 
     const handleAdd = () => {

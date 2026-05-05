@@ -28,6 +28,11 @@ export const fetchOrderByNumber = createAsyncThunk(
   'order/fetchOrderByNumber',
   async (number: number) => {
     const res = await getOrderByNumberApi(number);
+
+    if (!res.orders || !res.orders.length) {
+      throw new Error('Order not found');
+    }
+
     return res.orders[0];
   }
 );
@@ -54,6 +59,9 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrderByNumber.fulfilled, (state, action) => {
         state.orderData = action.payload;
+      })
+      .addCase(fetchOrderByNumber.rejected, (state) => {
+        state.orderData = null;
       });
   }
 });

@@ -8,17 +8,25 @@ export const Feed: FC = () => {
   /** TODO: взять переменную из стора */
   const dispatch = useDispatch();
 
-  const orders = useSelector((state) => state.feed.orders) || [];
-  const total = useSelector((state) => state.feed.total);
-  const totalToday = useSelector((state) => state.feed.totalToday);
+  const { orders, isLoading } = useSelector((state) => state.feed);
 
   useEffect(() => {
-    dispatch(fetchFeed());
-  }, [dispatch]);
+    if (!orders.length) {
+      dispatch(fetchFeed());
+    }
+  }, [dispatch, orders.length]);
 
-  if (!orders.length) {
+  if (isLoading) {
     return <Preloader />;
   }
 
-  return <FeedUI orders={orders} total={total} totalToday={totalToday} />;
+  return (
+    <FeedUI
+      orders={orders}
+      handleGetFeeds={() => {
+        console.log('CLICK');
+        dispatch(fetchFeed());
+      }}
+    />
+  );
 };
