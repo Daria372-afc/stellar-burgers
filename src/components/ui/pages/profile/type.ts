@@ -11,4 +11,12 @@ export type ProfileUIProps = {
   handleCancel: (e: SyntheticEvent) => void;
   handleInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   updateUserError?: string;
+  handleLogout: () => void;
+
+  success?: boolean;
+
+  activeField: string | null;
+  setActiveField: (value: string | null) => void;
+
+  errorField?: string | null;
 };
