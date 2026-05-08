@@ -1,10 +1,20 @@
+const testUrl = 'http://localhost:4000';
+
+const bunName = 'Краторная булка N-200i';
+const ingredientName = 'Биокотлета из марсианской Магнолии';
+
+const constructorSelector = '[data-cy=constructor]';
+const modalSelector = '[data-cy=modal]';
+const closeModalSelector = '[data-cy=close-modal]';
+const overlaySelector = '[data-cy=overlay]';
+
 describe('constructor page', () => {
   beforeEach(() => {
-    cy.intercept('GET', '**/api/ingredients', {
+    cy.intercept('GET', '/api/ingredients', {
       fixture: 'ingredients.json'
     });
 
-    cy.intercept('GET', '**/api/auth/user', {
+    cy.intercept('GET', '/api/auth/user', {
       fixture: 'user.json'
     });
 
@@ -16,73 +26,66 @@ describe('constructor page', () => {
 
     cy.setCookie('accessToken', 'test-access-token');
 
-    cy.visit('http://localhost:4000');
+    cy.visit(testUrl);
 
     cy.reload(true);
   });
 
   it('should open ingredient modal', () => {
-    cy.contains('Краторная булка N-200i').click();
+    cy.contains(bunName).click();
 
-    cy.get('[data-cy=modal]').should('exist');
+    cy.get(modalSelector).should('exist');
+
+    cy.get(modalSelector).should('contain', bunName);
   });
 
   it('should close ingredient modal', () => {
-    cy.contains('Краторная булка N-200i').click();
+    cy.contains(bunName).click();
 
-    cy.get('[data-cy=modal]').should('exist');
+    cy.get(modalSelector).should('exist');
 
-    cy.get('[data-cy=close-modal]').click();
+    cy.get(closeModalSelector).click();
 
-    cy.get('[data-cy=modal]').should('not.exist');
+    cy.get(modalSelector).should('not.exist');
   });
 
   it('should close modal by overlay click', () => {
-    cy.contains('Краторная булка N-200i').click();
+    cy.contains(bunName).click();
 
-    cy.get('[data-cy=modal]').should('exist');
+    cy.get(modalSelector).should('exist');
 
-    cy.get('[data-cy=overlay]').click({ force: true });
+    cy.get(overlaySelector).click({ force: true });
 
-    cy.get('[data-cy=modal]').should('not.exist');
+    cy.get(modalSelector).should('not.exist');
   });
 
   it('should add bun to constructor', () => {
-    cy.contains('Краторная булка N-200i').parent().contains('Добавить').click();
+    cy.contains(bunName).parent().contains('Добавить').click();
 
-    cy.get('[data-cy=constructor]').should('contain', 'Краторная булка N-200i');
+    cy.get(constructorSelector).should('contain', bunName);
   });
 
   it('should add ingredient to constructor', () => {
-    cy.contains('Биокотлета из марсианской Магнолии')
-      .parent()
-      .contains('Добавить')
-      .click();
+    cy.contains(ingredientName).parent().contains('Добавить').click();
 
-    cy.get('[data-cy=constructor]').should(
-      'contain',
-      'Биокотлета из марсианской Магнолии'
-    );
+    cy.get(constructorSelector).should('contain', ingredientName);
   });
 
   it('should create order', () => {
-    cy.contains('Краторная булка N-200i').parent().contains('Добавить').click();
+    cy.contains(bunName).parent().contains('Добавить').click();
 
-    cy.contains('Биокотлета из марсианской Магнолии')
-      .parent()
-      .contains('Добавить')
-      .click();
+    cy.contains(ingredientName).parent().contains('Добавить').click();
 
     cy.contains('Оформить заказ').click();
 
     cy.contains('12345').should('exist');
 
-    cy.get('[data-cy=close-modal]').click();
+    cy.get(closeModalSelector).click();
 
-    cy.get('[data-cy=modal]').should('not.exist');
+    cy.get(modalSelector).should('not.exist');
 
-    cy.get('[data-cy=constructor]').should('contain', 'Выберите булки');
+    cy.get(constructorSelector).should('contain', 'Выберите булки');
 
-    cy.get('[data-cy=constructor]').should('contain', 'Выберите начинку');
+    cy.get(constructorSelector).should('contain', 'Выберите начинку');
   });
 });

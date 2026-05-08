@@ -1,31 +1,30 @@
 /// <reference types="jest" />
 
-import ingredientsReducer, { fetchIngredients } from './ingredientsSlice';
+import ingredientsReducer, {
+  fetchIngredients,
+  initialState
+} from './ingredientsSlice';
+
+const mockIngredient = {
+  _id: '1',
+  name: 'Булка',
+  type: 'bun',
+  proteins: 10,
+  fat: 10,
+  carbohydrates: 10,
+  calories: 100,
+  price: 100,
+  image: '',
+  image_mobile: '',
+  image_large: ''
+};
+
+const mockIngredients = [mockIngredient];
 
 describe('ingredientsSlice', () => {
-  const mockIngredients = [
-    {
-      _id: '1',
-      name: 'Булка',
-      type: 'bun',
-      proteins: 10,
-      fat: 10,
-      carbohydrates: 10,
-      calories: 100,
-      price: 100,
-      image: '',
-      image_mobile: '',
-      image_large: ''
-    }
-  ];
-
   it('should handle pending', () => {
     const state = ingredientsReducer(
-      {
-        items: [],
-        isLoading: false,
-        error: null
-      },
+      initialState,
       fetchIngredients.pending('', undefined)
     );
 
@@ -35,9 +34,8 @@ describe('ingredientsSlice', () => {
   it('should handle fulfilled', () => {
     const state = ingredientsReducer(
       {
-        items: [],
-        isLoading: true,
-        error: null
+        ...initialState,
+        isLoading: true
       },
       fetchIngredients.fulfilled(mockIngredients, '', undefined)
     );
@@ -49,9 +47,8 @@ describe('ingredientsSlice', () => {
   it('should handle rejected', () => {
     const state = ingredientsReducer(
       {
-        items: [],
-        isLoading: true,
-        error: null
+        ...initialState,
+        isLoading: true
       },
       fetchIngredients.rejected(new Error('Ошибка'), '', undefined)
     );
